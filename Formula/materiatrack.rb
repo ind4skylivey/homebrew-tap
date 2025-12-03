@@ -1,52 +1,57 @@
-# Homebrew formula for MatteriaTrack
-# Final Fantasy-themed CLI time tracker
-
 class Materiatrack < Formula
-  desc "Mystical Final Fantasy-themed CLI time tracker based on Zeit"
+  desc "Mystical Final Fantasy-themed CLI time tracker for power users"
   homepage "https://github.com/ind4skylivey/matteria-track"
-  url "https://github.com/ind4skylivey/matteria-track/archive/refs/tags/v1.0.4.tar.gz"
-  sha256 "92cb8bf4f1a6073bff61839cd146208417541ec4f5673cb18482cc4b3e5dbc37"
+  version "1.0.6"
+  if OS.mac?
+    if Hardware::CPU.arm?
+      url "https://github.com/ind4skylivey/matteria-track/releases/download/v1.0.6/materiatrack-aarch64-apple-darwin.tar.xz"
+      sha256 "600035a90686d3ac3fd93e8d9d52cf68a096553ba93e4b73ea6f0bdf3c9bf719"
+    end
+    if Hardware::CPU.intel?
+      url "https://github.com/ind4skylivey/matteria-track/releases/download/v1.0.6/materiatrack-x86_64-apple-darwin.tar.xz"
+      sha256 "70ebadc386475d3c2f57dca6b6a3d1d6f219619ae78f6b7c43bc88fd3669954f"
+    end
+  end
+  if OS.linux? && Hardware::CPU.intel?
+    url "https://github.com/ind4skylivey/matteria-track/releases/download/v1.0.6/materiatrack-x86_64-unknown-linux-gnu.tar.xz"
+    sha256 "2e5ed481cf9435fa8310a1ca519e7df5fea018add549fcb81aceb064ab827c76"
+  end
   license "MIT"
-  head "https://github.com/ind4skylivey/matteria-track.git", branch: "main"
 
-  depends_on "rust" => :build
+  BINARY_ALIASES = {
+    "aarch64-apple-darwin":     {},
+    "x86_64-apple-darwin":      {},
+    "x86_64-unknown-linux-gnu": {},
+  }.freeze
+
+  def target_triple
+    cpu = Hardware::CPU.arm? ? "aarch64" : "x86_64"
+    os = OS.mac? ? "apple-darwin" : "unknown-linux-gnu"
+
+    "#{cpu}-#{os}"
+  end
+
+  def install_binary_aliases!
+    BINARY_ALIASES[target_triple.to_sym].each do |source, dests|
+      dests.each do |dest|
+        bin.install_symlink bin/source.to_s => dest
+      end
+    end
+  end
 
   def install
-    system "cargo", "install", *std_cargo_args
+    bin.install "materiatrack" if OS.mac? && Hardware::CPU.arm?
+    bin.install "materiatrack" if OS.mac? && Hardware::CPU.intel?
+    bin.install "materiatrack" if OS.linux? && Hardware::CPU.intel?
 
-    man1.install "man/materiatrack.1" if File.exist?("man/materiatrack.1")
+    install_binary_aliases!
 
-    bash_completion.install "completions/materiatrack.bash" if File.exist?("completions/materiatrack.bash")
-    zsh_completion.install "completions/_materiatrack" if File.exist?("completions/_materiatrack")
-    fish_completion.install "completions/materiatrack.fish" if File.exist?("completions/materiatrack.fish")
+    # Homebrew will automatically install these, so we don't need to do that
+    doc_files = Dir["README.*", "readme.*", "LICENSE", "LICENSE.*", "CHANGELOG.*"]
+    leftover_contents = Dir["*"] - doc_files
 
-    bin.install_symlink "materiatrack" => "mtrack"
-  end
-
-  def caveats
-    <<~EOS
-      💎 MatteriaTrack has been installed!
-
-      Quick start:
-        mtrack track -p "Project" -t "Task"  # Start tracking
-        mtrack finish                        # Stop tracking
-        mtrack list                          # Show entries
-        mtrack stats                         # View statistics
-
-      Configuration file: #{etc}/materiatrack/config.toml
-      Database location: ~/Library/Application Support/materiatrack/
-
-      "Master your time, master your destiny"
-    EOS
-  end
-
-  test do
-    assert_match "materiatrack", shell_output("#{bin}/materiatrack --version")
-
-    system bin/"materiatrack", "project", "add", "TestProject"
-    system bin/"materiatrack", "task", "add", "TestTask", "-p", "TestProject"
-
-    output = shell_output("#{bin}/materiatrack project list")
-    assert_match "TestProject", output
+    # Install any leftover files in pkgshare; these are probably config or
+    # sample files.
+    pkgshare.install(*leftover_contents) unless leftover_contents.empty?
   end
 end

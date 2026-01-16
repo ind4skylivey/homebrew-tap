@@ -1,20 +1,20 @@
 class Materiatrack < Formula
   desc "Mystical Final Fantasy-themed CLI time tracker for power users"
   homepage "https://github.com/ind4skylivey/matteria-track"
-  version "1.0.6"
+  version "1.1.0"
   if OS.mac?
     if Hardware::CPU.arm?
-      url "https://github.com/ind4skylivey/matteria-track/releases/download/v1.0.6/materiatrack-aarch64-apple-darwin.tar.xz"
-      sha256 "600035a90686d3ac3fd93e8d9d52cf68a096553ba93e4b73ea6f0bdf3c9bf719"
+      url "https://github.com/ind4skylivey/matteria-track/releases/download/v1.1.0/materiatrack-aarch64-apple-darwin.tar.xz"
+      sha256 "1466437118de41d3e89c982cee1f65435361e1a3c637fde35e074ce1cb728157"
     end
     if Hardware::CPU.intel?
-      url "https://github.com/ind4skylivey/matteria-track/releases/download/v1.0.6/materiatrack-x86_64-apple-darwin.tar.xz"
-      sha256 "70ebadc386475d3c2f57dca6b6a3d1d6f219619ae78f6b7c43bc88fd3669954f"
+      url "https://github.com/ind4skylivey/matteria-track/releases/download/v1.1.0/materiatrack-x86_64-apple-darwin.tar.xz"
+      sha256 "c3f719553c6458b61f8e2769f3aed67c9fc2d6a5752fada5f641848aaf09a842"
     end
   end
   if OS.linux? && Hardware::CPU.intel?
-    url "https://github.com/ind4skylivey/matteria-track/releases/download/v1.0.6/materiatrack-x86_64-unknown-linux-gnu.tar.xz"
-    sha256 "2e5ed481cf9435fa8310a1ca519e7df5fea018add549fcb81aceb064ab827c76"
+      url "https://github.com/ind4skylivey/matteria-track/releases/download/v1.1.0/materiatrack-x86_64-unknown-linux-gnu.tar.xz"
+      sha256 "6494a32b8ee39719f5f34cf37b95b108b212c54212dbf15a4c4a9fd0fed5aca5"
   end
   license "MIT"
 
